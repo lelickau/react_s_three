@@ -8,22 +8,29 @@ import gotService from '../../services/gotServise';
 
 export default class RandomChar extends Component {
 
-    constructor() {
-        super();
-        this.updateChar();
-    }
-
     gotService = new gotService();
-
+    
     state = {
         char: {},
         loading: true,
         error: false,
     }
 
-    onCharLoader = (char) => {
-        this.setState({char, loading: false})
+    componentDidMount() {
+        this.updateChar();
+        //this.timerId = setInterval(this.updateChar, 1500);
     }
+
+    componentWillUnmount() {
+        clearInterval(this.timerId);
+    }
+
+    onCharLoaded = (char) => {
+        this.setState({
+            char,
+            loading: false
+        });
+    };
 
     onError = (err) => {
         this.setState({
@@ -32,16 +39,17 @@ export default class RandomChar extends Component {
         })
     }
 
-    updateChar() {
-        const id = Math.floor(Math.random()*140 + 25); // от 25 - до 140
-        this.gotService.getCharacter(id)
-            .then(this.onCharLoader)
-            .catch(this.onError)
-
+    updateChar = () => {
+        const id = Math.floor(Math.random()*140 + 25);// от 25 - до 140
+        // const id = 130000;
+        this.gotService
+          .getCharacter(id)
+          .then(this.onCharLoaded)
+          .catch(this.onError);
     }
 
     render() {
-        
+        console.log('render');
         const {char, loading, error} = this.state;
         const errorMessage = error ? <ErrorMessage/> : null;
         const spinner = loading ? <Spinner/> : null;
