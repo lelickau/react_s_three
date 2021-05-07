@@ -1,4 +1,4 @@
-## 1.4 Свойства по умолчанию (props) [prop-types]
+## 1.4 Навигация в приложении с помощью React Router / Свойства по умолчанию (props) [prop-types]
 
 
 ## 1.3 React Patterns / React.Children React.Children.map(children, function[(thisArg)])
