@@ -1,84 +1,47 @@
-import React, {Component} from 'react';
+import React, {useEffect, useState} from 'react';
 import './randomChar.css';
 import Spinner from '../spinner';
 import ErrorMessage from '../errorMessage';
-import PropTypes from 'prop-types';
 
-import gotService from '../../services/gotServise';
+const RandomChar = ({getData}) => {
 
-export default class RandomChar extends Component {
+    const [char, setChar] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, ifError] = useState(false);
 
-    gotService = new gotService();
-    state = {
-        char: {},
-        loading: true,
-        error: false
-    }
+    useEffect(() => {
+        updateChar();
+        let timerId = setInterval(updateChar, 15000);
+        return() => {
+            clearInterval(timerId);
+        }
+    }, [])
 
-    componentDidMount() {
-        this.updateChar();
-        this.timerId = setInterval(this.updateChar, this.props.interval);
-    }
-
-    componentWillUnmount(){
-        clearInterval(this.timerId);
-    }
-
-    onCharLoaded = (char) => {
-        this.setState({
-            char,
-            loading: false
-        })
-    }
-
-    onError = (err) => {
-        this.setState({
-            error: true,
-            loading: false
-        })
-    }
-
-    updateChar = () => {
+    const updateChar = () => {
         const id = Math.floor(Math.random()*140 + 25); //25-140
-        this.gotService.getCharacter(id)
-            .then(this.onCharLoaded)
-            .catch(this.onError);
+        getData(id)
+            .then((data) => {
+                setChar(data);
+                setLoading(false);
+            })
+            .catch(() => {
+                ifError(true);
+                setLoading(false);
+            });
     }
 
-    render() {
-        const { char, loading, error } = this.state;
+    const errorMessage = error ? <ErrorMessage/> : null;
+    const spinner = loading ? <Spinner/> : null;
+    const content = !(loading || error) ? <View char={char}/> : null;
 
-        const errorMessage = error ? <ErrorMessage/> : null;
-        const spinner = loading ? <Spinner/> : null;
-        const content = !(loading || error) ? <View char={char}/> : null;
-
-        return (
-            <div className="random-block rounded">
-                {errorMessage}
-                {spinner}
-                {content}
-            </div>
-        );
-    }
+    return (
+        <div className="random-block rounded">
+            {errorMessage}
+            {spinner}
+            {content}
+        </div>
+    );
 }
-
-RandomChar.defaultProps = {
-    interval: 15000,
-}
-RandomChar.propType = {
-    interval: PropTypes.number
-}
-
-// RandomChar.propType = {
-//     interval: (props, propName, componentName) => {
-//         const value = props[propName];
-
-//         if(typeof value === 'number' && !isNaN(value)) {
-//             return null
-//         }
-//         return new TypeError(`${componentName}: ${propName} must be a number`);
-//     }
-// }
 
 
 const View = ({char}) => {
@@ -107,3 +70,5 @@ const View = ({char}) => {
         </>
     )
 }
+
+export default RandomChar;
